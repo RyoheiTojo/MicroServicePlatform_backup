@@ -1,0 +1,11 @@
+all:
+  children:
+    manager:
+      hosts:
+        manager01:
+          hostvars_sample: "test1"
+      vars:
+        groupvars_sample1: "gvar1"
+        groupvars_sample2: "gvar2"
+  vars:
+    target_phase: "develop"
