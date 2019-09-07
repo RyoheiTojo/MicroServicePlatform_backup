@@ -1,0 +1,9 @@
+{
+  "server": true,
+  "ui": true,
+  "data_dir": "{{ data_dir }}",
+  "bootstrap_expect": 1,
+  "bind_addr": "{{ ansible_eth0.ipv4.address }}",
+  "client_addr": "{{ ansible_eth0.ipv4.address }}",
+  "advertise_addr": "{{ ansible_eth0.ipv4.address }}"
+}

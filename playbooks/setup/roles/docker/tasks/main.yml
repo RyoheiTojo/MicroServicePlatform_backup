@@ -1,3 +1,5 @@
+- include_vars: "../vars/{{ stage_env }}.yml"
+
 - name: Add Yum Repository for Docker
   yum_repository:
     name: dockerrepo
