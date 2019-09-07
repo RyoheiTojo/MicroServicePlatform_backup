@@ -5,7 +5,7 @@ all:
         manager01:
           hostvars_sample: "test1"
       vars:
-        groupvars_sample1: "gvar1"
-        groupvars_sample2: "gvar2"
+        nomad_server: True
+        consul_server: True
   vars:
     stage_env: "develop"
