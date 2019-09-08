@@ -1,0 +1,6 @@
+- name: Deploy
+  hosts: application
+  become: yes
+  roles:
+    - nomad_job
+

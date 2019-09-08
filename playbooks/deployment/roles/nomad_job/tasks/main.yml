@@ -1,0 +1,7 @@
+- include_vars: "../vars/{{ stage_env }}.yml"
+
+- name: Loop for each job-specification
+  include_tasks: template_job.yml
+  with_items: "{{ job_specification }}"
+  loop_control:
+    loop_var: job

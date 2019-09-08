@@ -1,0 +1,76 @@
+job "{{ job.name }}" {
+  datacenters = ["{{ job.datacenters | join('","') }}"]
+
+{% for cons in job.constraint %}
+  constraint {
+  {% for k,v in cons.iteritems() %}
+    {{ k }}  = "{{ v }}"
+  {% endfor %}
+  }
+{% endfor %}
+
+  type = "{{ job.type }}"
+
+  update {
+  {% for k,v in job['update'].iteritems() %}
+    {{ k }}  = "{{ v }}"
+  {% endfor %}
+  }
+  migrate {
+  {% for k,v in job['migrate'].iteritems() %}
+    {{ k }}  = "{{ v }}"
+  {% endfor %}
+  }
+  group "cache" {
+    count = 2
+
+    restart {
+      attempts = 2
+      interval = "30m"
+      delay = "15s"
+      mode = "fail"
+    }
+    ephemeral_disk {
+      size = 300
+    }
+
+    task "redis" {
+      driver = "docker"
+      config {
+        image = "mmeve/spring_boot_nomad_test:latest"
+        auth {
+          username = "mmeve"
+          password = "sinseidai"
+        }
+        port_map {
+          tomcat = 8080
+        }
+      }
+      env {
+        SPRING_PROFILES_ACTIVE = "nomad"
+        SPRING_CLOUD_CONSUL_HOST = "192.168.11.3"
+      }
+
+      resources {
+        cpu    = 500 # 500 MHz
+        memory = 256 # 256MB
+        network {
+          mbits = 10
+          port "tomcat" {}
+        }
+      }
+
+      service {
+        name = "redis-cache"
+        tags = ["global", "cache"]
+        port = "tomcat"
+        check {
+          name     = "alive"
+          type     = "tcp"
+          interval = "10s"
+          timeout  = "2s"
+        }
+      }
+    }
+  }
+}
