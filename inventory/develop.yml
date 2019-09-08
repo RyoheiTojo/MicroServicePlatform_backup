@@ -1,0 +1,13 @@
+all:
+  children:
+    manager:
+      hosts:
+        manager01:
+          hostvars_sample: "test1"
+        manager02:
+          hostvars_sample: "test1"
+      vars:
+        nomad_server: True
+        consul_server: True
+  vars:
+    stage_env: "develop"

@@ -1,0 +1,10 @@
+{
+  "server": true,
+  "ui": true,
+  "data_dir": "{{ data_dir }}",
+  "bootstrap_expect": {{ groups['manager'] | length }},
+  "bind_addr": "{{ ansible_eth0.ipv4.address }}",
+  "client_addr": "{{ ansible_eth0.ipv4.address }}",
+  "advertise_addr": "{{ ansible_eth0.ipv4.address }}",
+  "retry_join": ["{{ groups['manager']| map('extract', hostvars, ['ansible_eth0', 'ipv4', 'address'])| join('","')  }}"]
+}

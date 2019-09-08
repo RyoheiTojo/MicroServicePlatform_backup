@@ -1,0 +1,8 @@
+consul_zip:
+  url: "https://releases.hashicorp.com/consul/1.6.0/consul_1.6.0_linux_amd64.zip"
+  checksum: "06b9993384e5fad901e0a70185b198dc74f3f34e1660a40f194cd6095b5d59d4"
+
+install_dir: "/usr/local/bin"
+config_dir: "/etc/consul.d"
+data_dir: "/opt/consul/data"
+systemd_config_dir: "/etc/systemd/system"

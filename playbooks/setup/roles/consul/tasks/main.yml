@@ -1,0 +1,51 @@
+- include_vars: "../vars/{{ stage_env }}.yml"
+
+- name: Get Consul Zipfile
+  get_url: 
+    url: "{{ consul_zip.url }}"
+    dest: /tmp/consul.zip
+    sha256sum: "{{ consul_zip.checksum }}"
+
+- name: Unarchive consul zip
+  unarchive:
+    remote_src: yes
+    src: /tmp/consul.zip
+    dest: "{{ install_dir }}"
+
+- name: Create Consul Configration Dir
+  file:
+    path: "{{ config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create Consul Data Dir
+  file:
+    path: "{{ data_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Distribute Consul Config
+  template: 
+    src: ../templates/agent.json.j2
+    dest: "{{ config_dir }}/agent.json"
+  notify: Restart Consul Service
+
+- name: Distribute Consul Service Config
+  template: 
+    src: ../templates/consul.service.j2
+    dest: "{{ systemd_config_dir }}/consul.service"
+  notify: Restart Consul Service
+
+- name: Set Consul Cli Target
+  blockinfile:
+    path: /etc/bashrc
+    backup: yes
+    insertbefore: EOF
+    marker: "# {mark} Ansible Consul cli setting"
+    block: |
+      export CONSUL_HTTP_ADDR={{ ansible_eth0.ipv4.address }}:8500
+  when: consul_server == True

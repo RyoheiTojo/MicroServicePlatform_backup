@@ -1,0 +1,51 @@
+- include_vars: "../vars/{{ stage_env }}.yml"
+
+- name: Get Nomad Zipfile
+  get_url: 
+    url: "{{ nomad_zip.url }}"
+    dest: /tmp/nomad.zip
+    sha256sum: "{{ nomad_zip.checksum }}"
+
+- name: Unarchive nomad zip
+  unarchive:
+    remote_src: yes
+    src: /tmp/nomad.zip
+    dest: "{{ install_dir }}"
+
+- name: Create Nomad Configration Dir
+  file:
+    path: "{{ config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create Nomad Data Dir
+  file:
+    path: "{{ data_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Distribute Nomad Config
+  template: 
+    src: ../templates/agent.hcl.j2
+    dest: "{{ config_dir }}/agent.hcl"
+  notify: Restart Nomad Service
+
+- name: Distribute Nomad Service Config
+  template: 
+    src: ../templates/nomad.service.j2
+    dest: "{{ systemd_config_dir }}/nomad.service"
+  notify: Restart Nomad Service
+
+- name: Set Nomad Cli Target
+  blockinfile:
+    path: /etc/bashrc
+    backup: yes
+    insertbefore: EOF
+    marker: "# {mark} Ansible Nomad cli setting"
+    block: |
+      export NOMAD_ADDR=http://{{ ansible_eth0.ipv4.address }}:4646
+  when: nomad_server == True

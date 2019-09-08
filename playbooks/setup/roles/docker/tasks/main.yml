@@ -1,0 +1,36 @@
+- include_vars: "../vars/{{ stage_env }}.yml"
+
+- name: Add Yum Repository for Docker
+  yum_repository:
+    name: dockerrepo
+    description: Docker Repository
+    baseurl: https://yum.dockerproject.org/repo/main/centos/7/
+    enabled: yes
+    gpgkey: https://yum.dockerproject.org/gpg
+    gpgcheck: yes
+  tags: dockerhost
+  become: True
+
+- name: Install docker-engine
+  yum: 
+    name: docker-engine
+    enablerepo: dockerrepo
+    state: latest
+  tags: dockerhost
+  become: True
+
+- name: Auto Start Docker Service
+  service: 
+    name: docker 
+    state: started
+    enabled: True
+  tags: dockerhost
+  become: True
+
+- name: Add Docker Control User
+  user: 
+    name: "{{ docker_control_user }}"
+    groups: docker 
+    append: yes
+  tags: dockerhost
+  become: True
