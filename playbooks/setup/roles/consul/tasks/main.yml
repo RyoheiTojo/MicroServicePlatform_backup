@@ -32,15 +32,20 @@
   template: 
     src: ../templates/agent.json.j2
     dest: "{{ config_dir }}/agent.json"
+  notify: Restart Consul Service
 
 - name: Distribute Consul Service Config
   template: 
     src: ../templates/consul.service.j2
     dest: "{{ systemd_config_dir }}/consul.service"
+  notify: Restart Consul Service
 
-- name: Restart Consul Service
-  systemd:
-    name: consul.service
-    state: restarted
-    daemon_reload: yes
-    enabled: yes
+- name: Set Consul Cli Target
+  blockinfile:
+    path: /etc/bashrc
+    backup: yes
+    insertbefore: EOF
+    marker: "# {mark} Ansible Consul cli setting"
+    block: |
+      export CONSUL_HTTP_ADDR={{ ansible_eth0.ipv4.address }}:8500
+  when: consul_server == True

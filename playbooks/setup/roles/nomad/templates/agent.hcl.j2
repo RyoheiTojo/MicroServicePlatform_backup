@@ -10,7 +10,16 @@ server {
     enabled = true
 
     # Self-elect, should be 3 or 5 for production
-    bootstrap_expect = 1
+    bootstrap_expect = {{ groups['manager'] | length }}
+}
+
+server_join {
+    retry_join = ["{{ groups['manager']| map('extract', hostvars, ['ansible_eth0', 'ipv4', 'address'])| join('","')  }}"]
+
+}
+
+consul {
+    address = "{{ ansible_eth0.ipv4.address }}:8500"
 }
 {% else %}
 # Give the agent a unique name. Defaults to hostname
