@@ -1,5 +1,5 @@
-- name: setup management server
-  hosts: manager
+- name: setup application server
+  hosts: application
   become: yes
   roles:
     - docker

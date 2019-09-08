@@ -48,4 +48,3 @@
     marker: "# {mark} Ansible Nomad cli setting"
     block: |
       export NOMAD_ADDR=http://{{ ansible_eth0.ipv4.address }}:4646
-  when: nomad_server == True

@@ -9,5 +9,12 @@ all:
       vars:
         nomad_server: True
         consul_server: True
+    application:
+      hosts:
+        application01:
+          hostvars_sample: "test1"
+      vars:
+        nomad_server: False
+        consul_server: False
   vars:
     stage_env: "develop"
