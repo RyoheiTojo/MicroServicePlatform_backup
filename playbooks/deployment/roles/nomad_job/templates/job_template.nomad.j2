@@ -1,41 +1,73 @@
 job "{{ job.name }}" {
-  datacenters = ["{{ job.datacenters | join('","') }}"]
 
-{% for cons in job.constraint %}
+  {% if job.datacenters is defined -%}
+  datacenters = ["{{ job.datacenters | join('","') }}"]
+  {%- endif %}
+
+  {% if job.constraint is defined %}
+  {%- for cons in job.constraint -%}
   constraint {
   {% for k,v in cons.iteritems() %}
     {{ k }}  = "{{ v }}"
-  {% endfor %}
+  {% endfor -%}
   }
-{% endfor %}
+  {%- endfor %}
+  {% endif %}
 
+  {% if job.type is defined -%}
   type = "{{ job.type }}"
+  {% endif %}
 
+  {% if job['update'] is defined -%}
   update {
   {% for k,v in job['update'].iteritems() %}
     {{ k }}  = "{{ v }}"
-  {% endfor %}
+  {% endfor -%}
   }
+  {% endif %}
+
+  {% if job['migrate'] is defined -%}
   migrate {
   {% for k,v in job['migrate'].iteritems() %}
     {{ k }}  = "{{ v }}"
-  {% endfor %}
+  {% endfor -%}
   }
-  group "cache" {
-    count = 2
+  {% endif %}
 
+  {% if job['group'] is defined %}
+  {%- for group in job.group -%}
+  group "{{ group.name }}" {
+
+    {% if group.count is defined -%}
+    count = {{ group.count }}
+    {%- endif %}
+
+    {% if group.restart is defined -%}
     restart {
-      attempts = 2
-      interval = "30m"
-      delay = "15s"
-      mode = "fail"
+    {% for k,v in group.restart.iteritems() %}
+      {{ k }}  = "{{ v }}"
+    {% endfor -%}
     }
-    ephemeral_disk {
-      size = 300
-    }
+    {% endif %}
 
-    task "redis" {
-      driver = "docker"
+    {% if group.ephemeral_disk is defined -%}
+    ephemeral_disk {
+    {% for k,v in group.ephemeral_disk.iteritems() %}
+      {{ k }}  = "{{ v }}"
+    {% endfor -%}
+    }
+    {% endif %}
+
+
+    {% if group.task is defined %}
+    {%- for task in group.task -%}
+    task "{{ task.name }}" {
+
+      {% if task.driver is defined -%}
+      driver = "{{ task.driver }}"
+      {%- endif %}
+
+      {% if task.config is defined -%}
       config {
         image = "mmeve/spring_boot_nomad_test:latest"
         auth {
@@ -46,6 +78,7 @@ job "{{ job.name }}" {
           tomcat = 8080
         }
       }
+      {%- endif %}
       env {
         SPRING_PROFILES_ACTIVE = "nomad"
         SPRING_CLOUD_CONSUL_HOST = "192.168.11.3"
@@ -72,5 +105,9 @@ job "{{ job.name }}" {
         }
       }
     }
+{% endfor %}
+{%- endif %}
   }
+{% endfor %}
+{%- endif %}
 }
