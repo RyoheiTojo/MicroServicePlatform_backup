@@ -1,113 +1,127 @@
 job "{{ job.name }}" {
-
-  {% if job.datacenters is defined -%}
+  {% if job.datacenters is defined %}
   datacenters = ["{{ job.datacenters | join('","') }}"]
-  {%- endif %}
+  {% endif %}
 
   {% if job.constraint is defined %}
-  {%- for cons in job.constraint -%}
+  {% for cons in job.constraint %}
   constraint {
   {% for k,v in cons.iteritems() %}
     {{ k }}  = "{{ v }}"
-  {% endfor -%}
+  {% endfor %}
   }
-  {%- endfor %}
+  {% endfor %}
   {% endif %}
 
-  {% if job.type is defined -%}
-  type = "{{ job.type }}"
-  {% endif %}
+  {% if job.type is defined %}type = "{{ job.type }}"{% endif %}
 
-  {% if job['update'] is defined -%}
+  {% if job['update'] is defined %}
   update {
   {% for k,v in job['update'].iteritems() %}
     {{ k }}  = "{{ v }}"
-  {% endfor -%}
+  {% endfor %}
   }
   {% endif %}
 
-  {% if job['migrate'] is defined -%}
+  {% if job['migrate'] is defined %}
   migrate {
   {% for k,v in job['migrate'].iteritems() %}
     {{ k }}  = "{{ v }}"
-  {% endfor -%}
+  {% endfor %}
   }
   {% endif %}
 
   {% if job['group'] is defined %}
-  {%- for group in job.group -%}
+  {% for group in job.group %}
   group "{{ group.name }}" {
 
-    {% if group.count is defined -%}
-    count = {{ group.count }}
-    {%- endif %}
+    {% if group.count is defined %}count = {{ group.count }}{% endif %}
 
-    {% if group.restart is defined -%}
+    {% if group.restart is defined %}
     restart {
     {% for k,v in group.restart.iteritems() %}
       {{ k }}  = "{{ v }}"
-    {% endfor -%}
+    {% endfor %}
     }
     {% endif %}
 
-    {% if group.ephemeral_disk is defined -%}
+    {% if group.ephemeral_disk is defined %}
     ephemeral_disk {
     {% for k,v in group.ephemeral_disk.iteritems() %}
       {{ k }}  = "{{ v }}"
-    {% endfor -%}
+    {% endfor %}
     }
     {% endif %}
 
 
     {% if group.task is defined %}
-    {%- for task in group.task -%}
+    {% for task in group.task %}
     task "{{ task.name }}" {
 
-      {% if task.driver is defined -%}
-      driver = "{{ task.driver }}"
-      {%- endif %}
+      {% if task.driver is defined %}driver = "{{ task.driver }}"{% endif %}
 
-      {% if task.config is defined -%}
+      {% if task.config is defined %}
       config {
-        image = "mmeve/spring_boot_nomad_test:latest"
+        {% if task.config.image is defined %}image = "{{ task.config.image }}"{% endif %}
+
+        {% if task.config.auth is defined %}
         auth {
-          username = "mmeve"
-          password = "sinseidai"
+          {% for k,v in task.config.auth.iteritems() %}
+            {{ k }}  = "{{ v }}"
+          {% endfor %}
         }
+        {% endif %}
+
+        {% if task.config.port_map is defined %}
         port_map {
-          tomcat = 8080
+          {% for k,v in task.config.port_map.iteritems() %}
+            {{ k }}  = "{{ v }}"
+          {% endfor %}
         }
+        {% endif %}
       }
-      {%- endif %}
+      {% endif %}
+
+      {% if task.env is defined %}
       env {
-        SPRING_PROFILES_ACTIVE = "nomad"
-        SPRING_CLOUD_CONSUL_HOST = "192.168.11.3"
+        {% for k,v in task.env.iteritems() %}
+          {{ k }}  = "{{ v }}"
+        {% endfor %}
       }
+      {% endif %}
 
+      {% if task.resources is defined %}
       resources {
-        cpu    = 500 # 500 MHz
-        memory = 256 # 256MB
+        {% if task.resources.cpu is defined %}cpu    = {{ task.resources.cpu }}{% endif %}
+        {% if task.resources.memory is defined %}memory = {{ task.resources.memory }}{% endif %}
+        {% if task.resources.network is defined %}
         network {
-          mbits = 10
-          port "tomcat" {}
+          {% if task.resources.network.mbits is defined %}mbits = {{ task.resources.network.mbits }}{% endif %}
+          {% if task.resources.network.mbits is defined %}port "{{ task.resources.network.port }}" {} {% endif %}
         }
+        {% endif %}
       }
+      {% endif %}
 
+      {% for serv in task.service %}
       service {
-        name = "redis-cache"
-        tags = ["global", "cache"]
-        port = "tomcat"
+        {% if serv.name is defined %}name = "{{ serv.name }}"{% endif %}
+        {% if serv.tags is defined %}tags = ["{{ serv.tags | join('","') }}"]{% endif %}
+        {% if serv.port is defined %}port = "{{ serv.port }}"{% endif %}
+        {% if serv.check is defined -%}
         check {
-          name     = "alive"
-          type     = "tcp"
-          interval = "10s"
-          timeout  = "2s"
+          {% if serv.check.name is defined %}name     = "{{ serv.check.name }}"{% endif %}
+          {% if serv.check.type is defined %}type     = "{{ serv.check.type }}"{% endif %}
+          {% if serv.check.interval is defined %}interval     = "{{ serv.check.interval }}"{% endif %}
+          {% if serv.check.timeout is defined %}timeout     = "{{ serv.check.timeout }}"{% endif %}
         }
+        {% endif %}
       }
+      {% endfor %}
     }
-{% endfor %}
-{%- endif %}
+    {% endfor %}
+    {% endif %}
   }
-{% endfor %}
-{%- endif %}
+  {% endfor %}
+  {% endif %}
 }

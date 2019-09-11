@@ -38,10 +38,8 @@ job_specification:
               port_map:
                 tomcat: 8080
             env:
-              - key: "SPRING_PROFILES_ACTIVE"
-                value: "nomad"
-              - key: "SPRING_CLOUD_CONSUL_HOST"
-                value: "192.168.11.3"
+              SPRING_PROFILES_ACTIVE: "nomad"
+              SPRING_CLOUD_CONSUL_HOST: "192.168.11.3"
             resources:
               cpu: 500
               memory: 256
@@ -49,11 +47,11 @@ job_specification:
                 mbits: 10
                 port: "tomcat"
             service:
-              name: "redis-cache"
-              tags: ["global", "cache"]
-              port: "tomcat"
-              check:
-                name: "alive"
-                type: "tcp"
-                interval: "10s"
-                timeout: "2s"
+              - name: "redis-cache"
+                tags: ["global", "cache"]
+                port: "tomcat"
+                check:
+                  name: "alive"
+                  type: "tcp"
+                  interval: "10s"
+                  timeout: "2s"
