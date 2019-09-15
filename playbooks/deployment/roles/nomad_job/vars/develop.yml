@@ -1,0 +1,57 @@
+job_specification:
+  - name: "samplejob1"
+    datacenters: ["dc1"]
+    constraint:
+      - operator: "distinct_hosts"
+        value: "true"
+    type: "service"
+    update:
+      max_parallel: 1
+      min_healthy_time: "10s"
+      healthy_deadline: "3m"
+      progress_deadline: "10m"
+      auto_revert: false
+      canary: 0
+    migrate:
+      max_parallel: 1
+      health_check: "checks"
+      min_healthy_time: "10s"
+      healthy_deadline: "5m"
+    group:
+      - name: "cache"
+        count: 2
+        restart:
+          attempts: 2
+          interval: "30m"
+          delay: "15s"
+          mode: "fail"
+        ephemeral_disk:
+          size: 300
+        task:
+          - name: "redis"
+            driver: "docker"
+            config:
+              image: "mmeve/spring_boot_nomad_test:latest"
+              auth: 
+                username: "mmeve"
+                password: "sinseidai"
+              port_map:
+                tomcat: 8080
+            env:
+              SPRING_PROFILES_ACTIVE: "nomad"
+              SPRING_CLOUD_CONSUL_HOST: "192.168.11.3"
+            resources:
+              cpu: 500
+              memory: 256
+              network:
+                mbits: 10
+                port: "tomcat"
+            service:
+              - name: "redis-cache"
+                tags: ["global", "cache"]
+                port: "tomcat"
+                check:
+                  name: "alive"
+                  type: "tcp"
+                  interval: "10s"
+                  timeout: "2s"

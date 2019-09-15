@@ -1,0 +1,124 @@
+job "{{ job.name }}" {
+  {% if job.datacenters is defined %}
+  datacenters = ["{{ job.datacenters | join('","') }}"]
+  {% endif %}
+
+  {% if job.constraint is defined %}
+  {% for cons in job.constraint %}
+  constraint {
+  {% for k,v in cons.iteritems() %}
+    {{ k }}  = "{{ v }}"
+  {% endfor %}
+  }
+  {% endfor %}
+  {% endif %}
+
+  {% if job.type is defined %}type = "{{ job.type }}"{% endif %}
+
+  {% if job['update'] is defined %}
+  update {
+  {% for k,v in job['update'].iteritems() %}
+    {{ k }}  = "{{ v }}"
+  {% endfor %}
+  }
+  {% endif %}
+
+  {% if job['migrate'] is defined %}
+  migrate {
+  {% for k,v in job['migrate'].iteritems() %}
+    {{ k }}  = "{{ v }}"
+  {% endfor %}
+  }
+  {% endif %}
+
+  {% if job.group is defined %}
+  group "{{ job.group.name }}" {
+
+    {% if job.group.count is defined %}count = {{ job.group.count }}{% endif %}
+
+    {% if job.group.restart is defined %}
+    restart {
+    {% for k,v in job.group.restart.iteritems() %}
+      {{ k }}  = "{{ v }}"
+    {% endfor %}
+    }
+    {% endif %}
+
+    {% if job.group.ephemeral_disk is defined %}
+    ephemeral_disk {
+    {% for k,v in job.group.ephemeral_disk.iteritems() %}
+      {{ k }}  = "{{ v }}"
+    {% endfor %}
+    }
+    {% endif %}
+
+
+    {% if job.group.task_app is defined %}
+    task "{{ job.group.task_app.name }}" {
+
+      {% if job.group.task_app.driver is defined %}driver = "{{ job.group.task_app.driver }}"{% endif %}
+
+      {% if job.group.task_app.config is defined %}
+      config {
+        {% if job.group.task_app.config.image is defined %}image = "{{ job.group.task_app.config.image }}"{% endif %}
+
+        {% if job.group.task_app.config.auth is defined %}
+        auth {
+          {% for k,v in job.group.task_app.config.auth.iteritems() %}
+            {{ k }}  = "{{ v }}"
+          {% endfor %}
+        }
+        {% endif %}
+
+        {% if job.group.task_app.config.port_map is defined %}
+        port_map {
+          {% for k,v in job.group.task_app.config.port_map.iteritems() %}
+            {{ k }}  = "{{ v }}"
+          {% endfor %}
+        }
+        {% endif %}
+      }
+      {% endif %}
+
+      {% if job.group.task_app.env is defined %}
+      env {
+        {% for k,v in job.group.task_app.env.iteritems() %}
+          {{ k }}  = "{{ v }}"
+        {% endfor %}
+      }
+      {% endif %}
+
+      {% if job.group.task_app.resources is defined %}
+      resources {
+        {% if job.group.task_app.resources.cpu is defined %}cpu    = {{ job.group.task_app.resources.cpu }}{% endif %}
+        {% if job.group.task_app.resources.memory is defined %}memory = {{ job.group.task_app.resources.memory }}{% endif %}
+        {% if job.group.task_app.resources.network is defined %}
+        network {
+          {% if job.group.task_app.resources.network.mbits is defined %}mbits = {{ job.group.task_app.resources.network.mbits }}{% endif %}
+          {% if job.group.task_app.resources.network.mbits is defined %}port "{{ job.group.task_app.resources.network.port }}" {} {% endif %}
+        }
+        {% endif %}
+      }
+      {% endif %}
+
+      {% if job.group.task_app.service_admin is defined %}
+      {% set serv = job.group.task_app.service_admin %}
+      service {
+        {% if serv.name is defined %}name = "{{ serv.name }}"{% endif %}
+        {% if serv.tags is defined %}tags = ["{{ serv.tags | join('","') }}"]{% endif %}
+        {% if serv.port is defined %}port = "{{ serv.port }}"{% endif %}
+        {% if serv.check is defined %}
+        check {
+          {% if serv.check.name is defined %}name     = "{{ serv.check.name }}"{% endif %}
+          {% if serv.check.type is defined %}type     = "{{ serv.check.type }}"{% endif %}
+          {% if serv.check.interval is defined %}interval     = "{{ serv.check.interval }}"{% endif %}
+          {% if serv.check.timeout is defined %}timeout     = "{{ serv.check.timeout }}"{% endif %}
+        }
+        {% endif %}
+      }
+      {% endif %}
+    }
+    {% endif %}
+  }
+  {% endif %}
+}

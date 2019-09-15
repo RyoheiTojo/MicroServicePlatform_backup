@@ -1,0 +1,5 @@
+- name: Template to Target
+  template:
+    src: ../templates/job_template.nomad.j2
+    dest: "/tmp/{{ job.name }}.nomad"
+

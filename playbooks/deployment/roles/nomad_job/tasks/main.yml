@@ -1,0 +1,9 @@
+- include_vars: "../../vars/{{ stage_env }}.yml"
+- name: combine variables
+  set_fact: 
+    job: "{{ job_default_setting | combine( job_configuration, recursive=True ) }}"
+- name: Template to Target
+  template:
+    src: ../templates/job_template.nomad.j2
+    dest: "/tmp/{{ job.name }}.nomad"
+

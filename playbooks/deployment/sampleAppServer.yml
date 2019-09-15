@@ -1,0 +1,5 @@
+- name: Deploy
+  hosts: application
+  become: yes
+  roles:
+    - { role: nomad_job, job_configuration: "{{ job_specification }}" }
