@@ -1,0 +1,18 @@
+job_specification:
+  name: "spring_boot"
+  constraint:
+    - operator: "distinct_hosts"
+      value: "true"
+  group:
+    name: "cache"
+    count: 2
+    task_app:
+      name: "redis"
+      config:
+        image: "mmeve/spring_boot_nomad_test:latest"
+      env:
+        SPRING_PROFILES_ACTIVE: "nomad"
+        SPRING_CLOUD_CONSUL_HOST: "192.168.11.3"
+      service_admin:
+        name: "redis-cache"
+

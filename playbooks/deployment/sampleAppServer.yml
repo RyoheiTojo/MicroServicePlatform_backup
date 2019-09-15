@@ -2,5 +2,4 @@
   hosts: application
   become: yes
   roles:
-    - nomad_job
-
+    - { role: nomad_job, job_configuration: "{{ job_specification }}" }

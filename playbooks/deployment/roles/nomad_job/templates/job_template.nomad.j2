@@ -31,50 +31,48 @@ job "{{ job.name }}" {
   }
   {% endif %}
 
-  {% if job['group'] is defined %}
-  {% for group in job.group %}
-  group "{{ group.name }}" {
+  {% if job.group is defined %}
+  group "{{ job.group.name }}" {
 
-    {% if group.count is defined %}count = {{ group.count }}{% endif %}
+    {% if job.group.count is defined %}count = {{ job.group.count }}{% endif %}
 
-    {% if group.restart is defined %}
+    {% if job.group.restart is defined %}
     restart {
-    {% for k,v in group.restart.iteritems() %}
+    {% for k,v in job.group.restart.iteritems() %}
       {{ k }}  = "{{ v }}"
     {% endfor %}
     }
     {% endif %}
 
-    {% if group.ephemeral_disk is defined %}
+    {% if job.group.ephemeral_disk is defined %}
     ephemeral_disk {
-    {% for k,v in group.ephemeral_disk.iteritems() %}
+    {% for k,v in job.group.ephemeral_disk.iteritems() %}
       {{ k }}  = "{{ v }}"
     {% endfor %}
     }
     {% endif %}
 
 
-    {% if group.task is defined %}
-    {% for task in group.task %}
-    task "{{ task.name }}" {
+    {% if job.group.task_app is defined %}
+    task "{{ job.group.task_app.name }}" {
 
-      {% if task.driver is defined %}driver = "{{ task.driver }}"{% endif %}
+      {% if job.group.task_app.driver is defined %}driver = "{{ job.group.task_app.driver }}"{% endif %}
 
-      {% if task.config is defined %}
+      {% if job.group.task_app.config is defined %}
       config {
-        {% if task.config.image is defined %}image = "{{ task.config.image }}"{% endif %}
+        {% if job.group.task_app.config.image is defined %}image = "{{ job.group.task_app.config.image }}"{% endif %}
 
-        {% if task.config.auth is defined %}
+        {% if job.group.task_app.config.auth is defined %}
         auth {
-          {% for k,v in task.config.auth.iteritems() %}
+          {% for k,v in job.group.task_app.config.auth.iteritems() %}
             {{ k }}  = "{{ v }}"
           {% endfor %}
         }
         {% endif %}
 
-        {% if task.config.port_map is defined %}
+        {% if job.group.task_app.config.port_map is defined %}
         port_map {
-          {% for k,v in task.config.port_map.iteritems() %}
+          {% for k,v in job.group.task_app.config.port_map.iteritems() %}
             {{ k }}  = "{{ v }}"
           {% endfor %}
         }
@@ -82,33 +80,34 @@ job "{{ job.name }}" {
       }
       {% endif %}
 
-      {% if task.env is defined %}
+      {% if job.group.task_app.env is defined %}
       env {
-        {% for k,v in task.env.iteritems() %}
+        {% for k,v in job.group.task_app.env.iteritems() %}
           {{ k }}  = "{{ v }}"
         {% endfor %}
       }
       {% endif %}
 
-      {% if task.resources is defined %}
+      {% if job.group.task_app.resources is defined %}
       resources {
-        {% if task.resources.cpu is defined %}cpu    = {{ task.resources.cpu }}{% endif %}
-        {% if task.resources.memory is defined %}memory = {{ task.resources.memory }}{% endif %}
-        {% if task.resources.network is defined %}
+        {% if job.group.task_app.resources.cpu is defined %}cpu    = {{ job.group.task_app.resources.cpu }}{% endif %}
+        {% if job.group.task_app.resources.memory is defined %}memory = {{ job.group.task_app.resources.memory }}{% endif %}
+        {% if job.group.task_app.resources.network is defined %}
         network {
-          {% if task.resources.network.mbits is defined %}mbits = {{ task.resources.network.mbits }}{% endif %}
-          {% if task.resources.network.mbits is defined %}port "{{ task.resources.network.port }}" {} {% endif %}
+          {% if job.group.task_app.resources.network.mbits is defined %}mbits = {{ job.group.task_app.resources.network.mbits }}{% endif %}
+          {% if job.group.task_app.resources.network.mbits is defined %}port "{{ job.group.task_app.resources.network.port }}" {} {% endif %}
         }
         {% endif %}
       }
       {% endif %}
 
-      {% for serv in task.service %}
+      {% if job.group.task_app.service_admin is defined %}
+      {% set serv = job.group.task_app.service_admin %}
       service {
         {% if serv.name is defined %}name = "{{ serv.name }}"{% endif %}
         {% if serv.tags is defined %}tags = ["{{ serv.tags | join('","') }}"]{% endif %}
         {% if serv.port is defined %}port = "{{ serv.port }}"{% endif %}
-        {% if serv.check is defined -%}
+        {% if serv.check is defined %}
         check {
           {% if serv.check.name is defined %}name     = "{{ serv.check.name }}"{% endif %}
           {% if serv.check.type is defined %}type     = "{{ serv.check.type }}"{% endif %}
@@ -117,11 +116,9 @@ job "{{ job.name }}" {
         }
         {% endif %}
       }
-      {% endfor %}
+      {% endif %}
     }
-    {% endfor %}
     {% endif %}
   }
-  {% endfor %}
   {% endif %}
 }
