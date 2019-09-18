@@ -34,7 +34,7 @@ job_specification:
               image: "mmeve/spring_boot_nomad_test:latest"
               auth: 
                 username: "mmeve"
-                password: "sinseidai"
+                password: "xxxxxxxxx"
               port_map:
                 tomcat: 8080
             env:
